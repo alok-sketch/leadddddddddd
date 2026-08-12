@@ -1,0 +1,48 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Scraped Data & Output Files (do not commit lead CSVs to git)
+leads.csv
+leads.xlsx
+*.csv
+*.xlsx
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+
+# Playwright & Browser Cache
+.cache/
+ms-playwright/
+
+# Log files & task logs
+*.log
+logs/
+
+# Operating System & IDE
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.idea/
+*.swp
+*.swo
+
+# Temporary scratch & coverage
+.pytest_cache/
+.coverage
+htmlcov/

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LeadForge — Google Maps Lead Scraper & Discovery</title>
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- FontAwesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Background Ambient Glow Mesh -->
+  <div class="glow-bg"></div>
+
+  <div class="app-container">
+    <!-- Navbar -->
+    <header class="navbar">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="fa-solid fa-compass-drafting"></i>
+        </div>
+        <div class="brand-text">
+          <h1>LeadForge <span>Maps</span></h1>
+          <p>B2B Lead Discovery & Scraping Engine</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="status-pill" id="globalStatusPill">
+          <span class="status-dot"></span>
+          <span id="globalStatusText">Ready</span>
+        </div>
+        <a href="/api/download" class="btn btn-secondary" id="navDownloadBtn">
+          <i class="fa-solid fa-download"></i> Download CSV
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Grid Layout -->
+    <main class="main-content">
+      
+      <!-- SECTION 1: Target Discovery "Whom to Search" Hub -->
+      <section class="card discovery-card">
+        <div class="card-header">
+          <div>
+            <h2><i class="fa-solid fa-bullseye glow-icon"></i> Target Discovery Hub</h2>
+            <p>Select high-converting B2B industry niches to instantly populate your search criteria</p>
+          </div>
+          <div class="search-preset-pills" id="categoryTabs">
+            <!-- Dynamic Category Pills -->
+          </div>
+        </div>
+
+        <div class="targets-grid" id="targetsGrid">
+          <!-- Dynamic Target Cards injected via JS -->
+        </div>
+      </section>
+
+      <!-- SECTION 2 & 3: Control Panel & Live Monitor -->
+      <div class="control-monitor-grid">
+        <!-- Control Panel -->
+        <section class="card control-card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-sliders glow-icon"></i> Search Configuration</h3>
+            <span class="badge badge-accent">Stealth Engine Active</span>
+          </div>
+          
+          <form id="scrapeForm" onsubmit="return false;">
+            <div class="form-group">
+              <label for="queryInput">Business Type / Niche Query</label>
+              <div class="input-wrapper">
+                <i class="fa-solid fa-magnifying-glass input-icon"></i>
+                <input type="text" id="queryInput" placeholder="e.g. Dentists, Gyms, HVAC Contractors" required />
+              </div>
+              <div class="tag-chips" id="quickQueryChips">
+                <span class="chip" onclick="setQuery('Dentists')">Dentists</span>
+                <span class="chip" onclick="setQuery('Real Estate Agency')">Real Estate</span>
+                <span class="chip" onclick="setQuery('Gyms')">Gyms</span>
+                <span class="chip" onclick="setQuery('Plumbers')">Plumbers</span>
+                <span class="chip" onclick="setQuery('Roofing contractor')">Roofing</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="locationInput">Target Location</label>
+              <div class="input-wrapper">
+                <i class="fa-solid fa-location-dot input-icon"></i>
+                <input type="text" id="locationInput" placeholder="e.g. Jaipur, India or Austin, TX" required />
+              </div>
+              <div class="tag-chips" id="quickLocationChips">
+                <span class="chip" onclick="setLocation('Jaipur, India')">Jaipur, IN</span>
+                <span class="chip" onclick="setLocation('Mumbai, India')">Mumbai, IN</span>
+                <span class="chip" onclick="setLocation('New York, NY')">New York, US</span>
+                <span class="chip" onclick="setLocation('London, UK')">London, UK</span>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="maxResultsInput">Max Leads Target</label>
+                <div class="range-wrapper">
+                  <input type="range" id="maxResultsRange" min="10" max="100" step="5" value="30" oninput="syncMaxResults(this.value)" />
+                  <input type="number" id="maxResultsInput" value="30" min="5" max="200" oninput="syncMaxResultsRange(this.value)" />
+                </div>
+              </div>
+
+              <div class="form-group flex-1">
+                <label for="delayInput">Enrich Delay (s)</label>
+                <input type="number" id="delayInput" value="1.5" min="0.5" max="5.0" step="0.5" />
+              </div>
+            </div>
+
+            <div class="form-group checkbox-group">
+              <label class="toggle-switch">
+                <input type="checkbox" id="enrichToggle" checked />
+                <span class="toggle-slider"></span>
+              </label>
+              <div class="toggle-label">
+                <strong>Enrich Phone, Website & Address</strong>
+                <small>Visits detail pages to extract phone numbers and website links</small>
+              </div>
+            </div>
+
+            <button type="submit" id="startScrapeBtn" class="btn btn-primary btn-block glow-btn">
+              <i class="fa-solid fa-rocket"></i> Launch Lead Scraper
+            </button>
+          </form>
+        </section>
+
+        <!-- Live Monitor -->
+        <section class="card monitor-card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-microchip glow-icon"></i> Scraper Execution Engine</h3>
+            <span class="badge" id="phaseBadge">Idle</span>
+          </div>
+
+          <div class="progress-section">
+            <div class="progress-info">
+              <span id="currentStatusMessage">Waiting for search launch...</span>
+              <strong id="progressCounter">0 / 0</strong>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" id="progressBarFill" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="console-box">
+            <div class="console-header">
+              <span><i class="fa-solid fa-terminal"></i> Terminal Logs</span>
+              <button class="btn-text" onclick="clearLogs()"><i class="fa-solid fa-eraser"></i> Clear</button>
+            </div>
+            <div class="console-logs" id="consoleLogs">
+              <div class="log-entry system">[System Initialized] Ready to initiate extraction job.</div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- SECTION 4: Leads Data Dashboard -->
+      <section class="card data-card">
+        <div class="card-header border-bottom">
+          <div>
+            <h2><i class="fa-solid fa-database glow-icon"></i> Business Leads Results</h2>
+            <p id="resultsSubtext">Extracted leads with contact information</p>
+          </div>
+          <div class="table-actions">
+            <button class="btn btn-outline" id="copyNoWebPhonesBtn" onclick="copyNoWebsitePhones()" title="Copy phone numbers of businesses without a website">
+              <i class="fa-solid fa-fire text-amber"></i> Pitch Targets Phones
+            </button>
+            <button class="btn btn-outline" id="copyPhonesBtn" onclick="copyAllPhones()">
+              <i class="fa-solid fa-copy"></i> Copy All Phones
+            </button>
+            <a href="/api/download" class="btn btn-secondary">
+              <i class="fa-solid fa-file-csv"></i> Export CSV
+            </a>
+          </div>
+        </div>
+
+        <!-- KPI Metrics Grid -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-icon icon-blue"><i class="fa-solid fa-users"></i></div>
+            <div class="kpi-data">
+              <span class="kpi-label">Total Leads</span>
+              <h3 id="kpiTotalCount">0</h3>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon icon-green"><i class="fa-solid fa-phone"></i></div>
+            <div class="kpi-data">
+              <span class="kpi-label">Phone Coverage</span>
+              <h3 id="kpiPhonePct">0%</h3>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon icon-amber" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">
+              <i class="fa-solid fa-laptop-code"></i>
+            </div>
+            <div class="kpi-data">
+              <span class="kpi-label">No Website (Web Pitch Target)</span>
+              <h3 id="kpiNoWebCount" style="color: #f87171;">0</h3>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon icon-purple"><i class="fa-solid fa-globe"></i></div>
+            <div class="kpi-data">
+              <span class="kpi-label">Has Website</span>
+              <h3 id="kpiWebPct">0%</h3>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table Filters -->
+        <div class="table-filter-bar">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="tableSearchInput" placeholder="Filter leads by name, phone, website, or address..." oninput="filterTable()" />
+          </div>
+          <div class="filter-options">
+            <button class="filter-pill active" onclick="setFilter('all', this)">All Leads</button>
+            <button class="filter-pill filter-pill-noweb" onclick="setFilter('no_website', this)">
+              <i class="fa-solid fa-circle-xmark"></i> No Website (Web Pitch Target)
+            </button>
+            <button class="filter-pill" onclick="setFilter('website', this)">
+              <i class="fa-solid fa-globe"></i> Has Website
+            </button>
+            <button class="filter-pill" onclick="setFilter('phone', this)">
+              <i class="fa-solid fa-phone"></i> Has Phone
+            </button>
+          </div>
+        </div>
+
+        <!-- Table View -->
+        <div class="table-container">
+          <table class="leads-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Business Name</th>
+                <th>Star Rating</th>
+                <th>Phone Number</th>
+                <th>Website</th>
+                <th>Address</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="leadsTableBody">
+              <tr>
+                <td colspan="7" class="empty-state">
+                  <i class="fa-solid fa-folder-open empty-icon"></i>
+                  <p>No business leads fetched yet. Run a search or select a Target Niche above!</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

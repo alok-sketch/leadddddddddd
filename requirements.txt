@@ -1,0 +1,5 @@
+fastapi>=0.115.0
+uvicorn>=0.30.0
+scrapling[fetchers]>=0.4.14
+patchright>=1.61.2
+playwright>=1.61.0

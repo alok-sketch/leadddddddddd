@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: leadforge-maps-scraper
+    env: docker
+    plan: starter # 1GB+ RAM recommended for headless Chromium
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/status
+    envVars:
+      - key: PORT
+        value: 8000
