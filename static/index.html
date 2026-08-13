@@ -3,18 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LeadForge — Google Maps Lead Scraper & Discovery</title>
-  <!-- Google Fonts: Inter & Outfit -->
+  <title>LeadForge — B2B Google Maps Lead Scraper & Discovery Engine</title>
+  <!-- Google Fonts: Inter, Outfit & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
   <!-- FontAwesome 6 Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Background Ambient Glow Mesh -->
-  <div class="glow-bg"></div>
+
+  <!-- Top System Technical Status Bar -->
+  <div class="sys-strip">
+    <div class="sys-strip-nodes">
+      <span><span class="dot-green"></span> SYS: ONLINE</span>
+      <span><i class="fa-solid fa-microchip"></i> STEALTH ENGINE: ACTIVE</span>
+      <span><i class="fa-solid fa-border-all"></i> GRID: 24MM</span>
+      <span><i class="fa-solid fa-phone-volume"></i> ENRICHMENT: PHONE + WEB</span>
+    </div>
+    <div>
+      <span>RATE LIMIT: STEALTH SAFE</span>
+    </div>
+  </div>
 
   <div class="app-container">
     <!-- Navbar -->
@@ -24,246 +35,434 @@
           <i class="fa-solid fa-compass-drafting"></i>
         </div>
         <div class="brand-text">
-          <h1>LeadForge <span>Maps</span></h1>
-          <p>B2B Lead Discovery & Scraping Engine</p>
+          <h1>LeadForge <span>Maps</span> <span class="accent-tag">B2B</span></h1>
+          <p>B2B Lead Discovery & Google Maps Scraping Engine</p>
         </div>
       </div>
       <div class="header-actions">
         <div class="status-pill" id="globalStatusPill">
           <span class="status-dot"></span>
-          <span id="globalStatusText">Ready</span>
+          <span id="globalStatusText">Ready to Scrape</span>
         </div>
         <a href="/api/download" class="btn btn-secondary" id="navDownloadBtn">
-          <i class="fa-solid fa-download"></i> Download CSV
+          <i class="fa-solid fa-file-csv"></i> Download CSV
         </a>
       </div>
     </header>
 
-    <!-- Main Grid Layout -->
-    <main class="main-content">
-      
-      <!-- SECTION 1: Target Discovery "Whom to Search" Hub -->
-      <section class="card discovery-card">
-        <div class="card-header">
-          <div>
-            <h2><i class="fa-solid fa-bullseye glow-icon"></i> Target Discovery Hub</h2>
-            <p>Select high-converting B2B industry niches to instantly populate your search criteria</p>
+    <!-- SECTION 1: HERO PORTAL WITH 3D B2B BLOCK MODEL -->
+    <section class="hero-grid">
+      <!-- Left Hero Card -->
+      <div class="hero-left-card">
+        <div>
+          <div class="hero-tag-row">
+            <span class="badge badge-dark"><i class="fa-solid fa-bullseye"></i> PIPELINE · 4 PHASES</span>
+            <span class="badge badge-green"><i class="fa-solid fa-shield-halved"></i> STEALTH API ACTIVE</span>
           </div>
-          <div class="search-preset-pills" id="categoryTabs">
-            <!-- Dynamic Category Pills -->
-          </div>
-        </div>
-
-        <div class="targets-grid" id="targetsGrid">
-          <!-- Dynamic Target Cards injected via JS -->
-        </div>
-      </section>
-
-      <!-- SECTION 2 & 3: Control Panel & Live Monitor -->
-      <div class="control-monitor-grid">
-        <!-- Control Panel -->
-        <section class="card control-card">
-          <div class="card-header">
-            <h3><i class="fa-solid fa-sliders glow-icon"></i> Search Configuration</h3>
-            <span class="badge badge-accent">Stealth Engine Active</span>
-          </div>
-          
-          <form id="scrapeForm" onsubmit="return false;">
-            <div class="form-group">
-              <label for="queryInput">Business Type / Niche Query</label>
-              <div class="input-wrapper">
-                <i class="fa-solid fa-magnifying-glass input-icon"></i>
-                <input type="text" id="queryInput" placeholder="e.g. Dentists, Gyms, HVAC Contractors" required />
-              </div>
-              <div class="tag-chips" id="quickQueryChips">
-                <span class="chip" onclick="setQuery('Dentists')">Dentists</span>
-                <span class="chip" onclick="setQuery('Real Estate Agency')">Real Estate</span>
-                <span class="chip" onclick="setQuery('Gyms')">Gyms</span>
-                <span class="chip" onclick="setQuery('Plumbers')">Plumbers</span>
-                <span class="chip" onclick="setQuery('Roofing contractor')">Roofing</span>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="locationInput">Target Location</label>
-              <div class="input-wrapper">
-                <i class="fa-solid fa-location-dot input-icon"></i>
-                <input type="text" id="locationInput" placeholder="e.g. Jaipur, India or Austin, TX" required />
-              </div>
-              <div class="tag-chips" id="quickLocationChips">
-                <span class="chip" onclick="setLocation('Jaipur, India')">Jaipur, IN</span>
-                <span class="chip" onclick="setLocation('Mumbai, India')">Mumbai, IN</span>
-                <span class="chip" onclick="setLocation('New York, NY')">New York, US</span>
-                <span class="chip" onclick="setLocation('London, UK')">London, UK</span>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group flex-1">
-                <label for="maxResultsInput">Max Leads Target</label>
-                <div class="range-wrapper">
-                  <input type="range" id="maxResultsRange" min="10" max="100" step="5" value="30" oninput="syncMaxResults(this.value)" />
-                  <input type="number" id="maxResultsInput" value="30" min="5" max="200" oninput="syncMaxResultsRange(this.value)" />
-                </div>
-              </div>
-
-              <div class="form-group flex-1">
-                <label for="delayInput">Enrich Delay (s)</label>
-                <input type="number" id="delayInput" value="1.5" min="0.5" max="5.0" step="0.5" />
-              </div>
-            </div>
-
-            <div class="form-group checkbox-group">
-              <label class="toggle-switch">
-                <input type="checkbox" id="enrichToggle" checked />
-                <span class="toggle-slider"></span>
-              </label>
-              <div class="toggle-label">
-                <strong>Enrich Phone, Website & Address</strong>
-                <small>Visits detail pages to extract phone numbers and website links</small>
-              </div>
-            </div>
-
-            <button type="submit" id="startScrapeBtn" class="btn btn-primary btn-block glow-btn">
-              <i class="fa-solid fa-rocket"></i> Launch Lead Scraper
+          <h1 class="hero-title">Scrape B2B Leads. <span>Extract phones.</span> Pitch targets.</h1>
+          <p class="hero-desc">
+            Industrial-grade B2B lead discovery & automated Google Maps extraction engine. Scrape verified business names, direct phone numbers, website URLs, and address data with stealth precision.
+          </p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" onclick="scrollToControl()">
+              <i class="fa-solid fa-rocket"></i> Launch Lead Scraper →
             </button>
-          </form>
-        </section>
-
-        <!-- Live Monitor -->
-        <section class="card monitor-card">
-          <div class="card-header">
-            <h3><i class="fa-solid fa-microchip glow-icon"></i> Scraper Execution Engine</h3>
-            <span class="badge" id="phaseBadge">Idle</span>
+            <button class="btn btn-dark" onclick="triggerFileUpload()">
+              <i class="fa-solid fa-file-import"></i> Upload Target List
+            </button>
           </div>
+        </div>
 
-          <div class="progress-section">
-            <div class="progress-info">
-              <span id="currentStatusMessage">Waiting for search launch...</span>
-              <strong id="progressCounter">0 / 0</strong>
-            </div>
-            <div class="progress-bar-container">
-              <div class="progress-bar-fill" id="progressBarFill" style="width: 0%"></div>
-            </div>
-          </div>
-
-          <div class="console-box">
-            <div class="console-header">
-              <span><i class="fa-solid fa-terminal"></i> Terminal Logs</span>
-              <button class="btn-text" onclick="clearLogs()"><i class="fa-solid fa-eraser"></i> Clear</button>
-            </div>
-            <div class="console-logs" id="consoleLogs">
-              <div class="log-entry system">[System Initialized] Ready to initiate extraction job.</div>
-            </div>
-          </div>
-        </section>
+        <div class="hero-specs-strip">
+          <span><i class="fa-solid fa-robot"></i> ENGINE: STEALTH PLAYWRIGHT</span>
+          <span><i class="fa-solid fa-phone"></i> ENRICHMENT: PHONE + WEB</span>
+          <span><i class="fa-solid fa-gauge-high"></i> SPEED: 30 LEADS/MIN</span>
+          <span><i class="fa-solid fa-check-double"></i> ACCURACY: 99.4%</span>
+        </div>
       </div>
 
-      <!-- SECTION 4: Leads Data Dashboard -->
-      <section class="card data-card">
-        <div class="card-header border-bottom">
+      <!-- Right 3D Hero Graphic Card -->
+      <div class="hero-3d-card" id="hero3DContainer">
+        <div class="corner-mark top-left">+ NODE: GOOGLE MAPS</div>
+        <div class="corner-mark top-right">+ FEED: ACTIVE</div>
+        <div class="corner-mark bottom-left">+ DISCOVERY ENGINE</div>
+        <div class="corner-mark bottom-right">+ 3D B2B MODEL</div>
+
+        <div class="hero-3d-header">
+          <span class="mono-tag" style="color: var(--accent-beige);"><i class="fa-solid fa-cubes"></i> 3D PIPELINE MODEL · B2B</span>
+          <span class="badge badge-dark" id="viewModeTag">ISOMETRIC PERSPECTIVE</span>
+        </div>
+
+        <!-- 3D Perspective Stage -->
+        <div class="stage-3d-viewport" id="viewport3D">
+          <div class="blocks-cluster" id="blocksCluster">
+            <!-- 3D Block Letter B -->
+            <div class="cad-num-block highlight" data-num="B1">
+              <div class="cad-num-face face-front">B</div>
+              <div class="cad-num-face face-back"></div>
+              <div class="cad-num-face face-top"></div>
+              <div class="cad-num-face face-bottom"></div>
+              <div class="cad-num-face face-left"></div>
+              <div class="cad-num-face face-right"></div>
+            </div>
+            <!-- 3D Block Letter 2 -->
+            <div class="cad-num-block" data-num="2">
+              <div class="cad-num-face face-front">2</div>
+              <div class="cad-num-face face-back"></div>
+              <div class="cad-num-face face-top"></div>
+              <div class="cad-num-face face-bottom"></div>
+              <div class="cad-num-face face-left"></div>
+              <div class="cad-num-face face-right"></div>
+            </div>
+            <!-- 3D Block Letter B -->
+            <div class="cad-num-block highlight" data-num="B2">
+              <div class="cad-num-face face-front">B</div>
+              <div class="cad-num-face face-back"></div>
+              <div class="cad-num-face face-top"></div>
+              <div class="cad-num-face face-bottom"></div>
+              <div class="cad-num-face face-left"></div>
+              <div class="cad-num-face face-right"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-3d-controls">
+          <div class="control-btn-group">
+            <button class="btn-icon-tech" id="btnRotate3D" onclick="toggleAutoRotate()"><i class="fa-solid fa-rotate"></i> AUTO ROTATE</button>
+            <button class="btn-icon-tech" id="btnExplode3D" onclick="toggleExplodeView()"><i class="fa-solid fa-arrows-up-down-left-right"></i> EXPLODE</button>
+          </div>
+          <button class="btn-icon-tech" onclick="reset3DView()"><i class="fa-solid fa-arrow-rotate-left"></i> RESET VIEW</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: TARGET LIST UPLOAD DROPZONE -->
+    <section class="dropzone-container" id="cadDropzone">
+      <input type="file" id="cadFileInput" accept=".csv,.txt,.json" style="display: none;" onchange="handleFileSelected(event)" />
+      <div class="dropzone-icon">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+      </div>
+      <h3 class="dropzone-title">+ Drop your Target List (.CSV / .TXT) or Query File here</h3>
+      <p class="dropzone-desc">Supports .CSV, .TXT, .JSON list of target search queries or cities · Instant target parsing & estimated leads counter</p>
+      <button class="btn btn-secondary" onclick="triggerFileUpload()">
+        <i class="fa-solid fa-folder-open"></i> Browse Target File
+      </button>
+
+      <!-- Dynamic Target Analysis Result Card -->
+      <div class="dropzone-info-result" id="cadAnalysisResult">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px dashed var(--border-dark); padding-bottom: 6px;">
+          <span style="color: #4ade80;"><i class="fa-solid fa-circle-check"></i> TARGET LIST PARSED</span>
+          <span id="cadFileName">targets_list.csv</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 10px;">
+          <div>Search Targets: <strong id="cadDims" style="color: #fff;">12 Queries</strong></div>
+          <div>Estimated Leads: <strong id="cadVol" style="color: #4ade80;">360 Leads</strong></div>
+          <div>Suggested Query: <strong id="cadStock" style="color: #fff;">Dentists</strong></div>
+          <div>Suggested Location: <strong id="cadNiche" style="color: #fff;">Austin, TX</strong></div>
+        </div>
+        <div style="margin-top: 12px; text-align: right;">
+          <button class="btn btn-primary" onclick="applyCadSuggestedQuery()">
+            <i class="fa-solid fa-crosshairs"></i> Apply First Search Target to Form
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: STEP-BY-STEP SCRAPING WORKFLOW -->
+    <section class="workflow-section">
+      <div class="card-header">
+        <div>
+          <h2><i class="fa-solid fa-list-check"></i> 02 · STEALTH SCRAPING PIPELINE WORKFLOW</h2>
+          <p>Sequential lead generation stages and automated data enrichment pipeline</p>
+        </div>
+        <span class="badge badge-dark">PIPELINE STATUS · 4 STAGES</span>
+      </div>
+
+      <div class="workflow-grid" id="workflowGrid">
+        <!-- Step 1 -->
+        <div class="workflow-card active" data-step="1">
+          <div class="step-num-badge">①</div>
           <div>
-            <h2><i class="fa-solid fa-database glow-icon"></i> Business Leads Results</h2>
-            <p id="resultsSubtext">Extracted leads with contact information</p>
+            <h4 class="workflow-step-title">01 TARGET DISCOVERY</h4>
+            <p class="workflow-step-desc">Select high-converting B2B industry niche & city criteria.</p>
           </div>
-          <div class="table-actions">
-            <button class="btn btn-outline" id="copyNoWebPhonesBtn" onclick="copyNoWebsitePhones()" title="Copy phone numbers of businesses without a website">
-              <i class="fa-solid fa-fire text-amber"></i> Pitch Targets Phones
-            </button>
-            <button class="btn btn-outline" id="copyPhonesBtn" onclick="copyAllPhones()">
-              <i class="fa-solid fa-copy"></i> Copy All Phones
-            </button>
-            <a href="/api/download" class="btn btn-secondary">
-              <i class="fa-solid fa-file-csv"></i> Export CSV
-            </a>
+          <div>
+            <span class="workflow-status-badge"><i class="fa-solid fa-check"></i> READY · DISCOVERY ACTIVE</span>
           </div>
         </div>
 
-        <!-- KPI Metrics Grid -->
-        <div class="kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-icon icon-blue"><i class="fa-solid fa-users"></i></div>
-            <div class="kpi-data">
-              <span class="kpi-label">Total Leads</span>
-              <h3 id="kpiTotalCount">0</h3>
-            </div>
+        <!-- Step 2 -->
+        <div class="workflow-card" data-step="2">
+          <div class="step-num-badge">②</div>
+          <div>
+            <h4 class="workflow-step-title">02 STEALTH MAPS FEED</h4>
+            <p class="workflow-step-desc">Scroll Google Maps search feed & collect business cards.</p>
           </div>
-          <div class="kpi-card">
-            <div class="kpi-icon icon-green"><i class="fa-solid fa-phone"></i></div>
-            <div class="kpi-data">
-              <span class="kpi-label">Phone Coverage</span>
-              <h3 id="kpiPhonePct">0%</h3>
-            </div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-icon icon-amber" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">
-              <i class="fa-solid fa-laptop-code"></i>
-            </div>
-            <div class="kpi-data">
-              <span class="kpi-label">No Website (Web Pitch Target)</span>
-              <h3 id="kpiNoWebCount" style="color: #f87171;">0</h3>
-            </div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-icon icon-purple"><i class="fa-solid fa-globe"></i></div>
-            <div class="kpi-data">
-              <span class="kpi-label">Has Website</span>
-              <h3 id="kpiWebPct">0%</h3>
-            </div>
+          <div>
+            <span class="workflow-status-badge"><i class="fa-solid fa-circle-notch fa-spin"></i> RUNNING · STEALTH FEED</span>
           </div>
         </div>
 
-        <!-- Table Filters -->
-        <div class="table-filter-bar">
-          <div class="search-box">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="tableSearchInput" placeholder="Filter leads by name, phone, website, or address..." oninput="filterTable()" />
+        <!-- Step 3 -->
+        <div class="workflow-card" data-step="3">
+          <div class="step-num-badge">③</div>
+          <div>
+            <h4 class="workflow-step-title">03 DETAIL ENRICHMENT</h4>
+            <p class="workflow-step-desc">Visit detail pages to extract phone numbers & domain URLs.</p>
           </div>
-          <div class="filter-options">
-            <button class="filter-pill active" onclick="setFilter('all', this)">All Leads</button>
-            <button class="filter-pill filter-pill-noweb" onclick="setFilter('no_website', this)">
-              <i class="fa-solid fa-circle-xmark"></i> No Website (Web Pitch Target)
-            </button>
-            <button class="filter-pill" onclick="setFilter('website', this)">
-              <i class="fa-solid fa-globe"></i> Has Website
-            </button>
-            <button class="filter-pill" onclick="setFilter('phone', this)">
-              <i class="fa-solid fa-phone"></i> Has Phone
-            </button>
+          <div>
+            <span class="workflow-status-badge"><i class="fa-solid fa-clock"></i> ACTIVE · PHONE & WEB ENRICH</span>
           </div>
         </div>
 
-        <!-- Table View -->
-        <div class="table-container">
-          <table class="leads-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Business Name</th>
-                <th>Star Rating</th>
-                <th>Phone Number</th>
-                <th>Website</th>
-                <th>Address</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="leadsTableBody">
-              <tr>
-                <td colspan="7" class="empty-state">
-                  <i class="fa-solid fa-folder-open empty-icon"></i>
-                  <p>No business leads fetched yet. Run a search or select a Target Niche above!</p>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <!-- Step 4 -->
+        <div class="workflow-card" data-step="4">
+          <div class="step-num-badge">④</div>
+          <div>
+            <h4 class="workflow-step-title">04 EXPORT & PITCH</h4>
+            <p class="workflow-step-desc">Export clean CSV dataset & pitch businesses without websites.</p>
+          </div>
+          <div>
+            <span class="workflow-status-badge"><i class="fa-solid fa-bullseye"></i> READY TO EXPORT</span>
+          </div>
         </div>
+      </div>
+
+      <!-- Terminal Engine Output Simulation Box -->
+      <div class="terminal-card">
+        <div class="terminal-header">
+          <span><i class="fa-solid fa-terminal"></i> STEALTH SCRAPING ENGINE TERMINAL OUTPUT</span>
+          <span>MODULE: MAPS_FETCHER_V3.6</span>
+        </div>
+        <div class="terminal-content" id="terminalGCodeContent">
+          <div class="terminal-line"><span class="terminal-ln">01</span>[SYSTEM] INITIALIZING LEADFORGE MAPS ENGINE...</div>
+          <div class="terminal-line"><span class="terminal-ln">02</span>[STEALTH] LAUNCHING HEADLESS BROWSER INSTANCE</div>
+          <div class="terminal-line"><span class="terminal-ln">03</span>[PHASE 1] TARGET: "Dentists" IN "Austin, TX"</div>
+          <div class="terminal-line"><span class="terminal-ln">04</span>[FEED] SCROLLING MAPS FEED... 30 LISTINGS FOUND</div>
+          <div class="terminal-line"><span class="terminal-ln">05</span>[PHASE 2] ENRICHING PHONES & WEBSITES...</div>
+          <div class="terminal-line"><span class="terminal-ln">06</span>[SUCCESS] EXTRACTED PHONE FOR: Austin Dental Arts (+1 512-555-0192)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: TARGET DISCOVERY HUB ("WHOM TO SEARCH") -->
+    <section class="card" id="discoverySection">
+      <div class="card-header">
+        <div>
+          <h2><i class="fa-solid fa-bullseye"></i> 03 · TARGET DISCOVERY HUB</h2>
+          <p>Select high-converting B2B industry niches to populate search criteria instantly</p>
+        </div>
+        <div class="search-preset-pills" id="categoryTabs">
+          <!-- Dynamic Category Pills -->
+        </div>
+      </div>
+
+      <div class="targets-grid" id="targetsGrid">
+        <!-- Dynamic Target Cards injected via JS -->
+      </div>
+    </section>
+
+    <!-- SECTION 5: CONTROL PANEL & LIVE MONITOR -->
+    <div class="control-monitor-grid" id="controlSection">
+      <!-- Search Configuration Card -->
+      <section class="card">
+        <div class="card-header">
+          <h3><i class="fa-solid fa-sliders"></i> Search Configuration</h3>
+          <span class="badge badge-green">Stealth Engine Active</span>
+        </div>
+        
+        <form id="scrapeForm" onsubmit="return false;">
+          <div class="form-group">
+            <label for="queryInput">Business Type / Niche Query</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-magnifying-glass input-icon"></i>
+              <input type="text" id="queryInput" placeholder="e.g. Dentists, Gyms, HVAC Contractors" required />
+            </div>
+            <div class="tag-chips" id="quickQueryChips">
+              <span class="chip" onclick="setQuery('Dentists')">Dentists</span>
+              <span class="chip" onclick="setQuery('Real Estate Agency')">Real Estate</span>
+              <span class="chip" onclick="setQuery('Gyms')">Gyms</span>
+              <span class="chip" onclick="setQuery('Plumbers')">Plumbers</span>
+              <span class="chip" onclick="setQuery('Roofing contractor')">Roofing</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="locationInput">Target Location</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-location-dot input-icon"></i>
+              <input type="text" id="locationInput" placeholder="e.g. Jaipur, India or Austin, TX" required />
+            </div>
+            <div class="tag-chips" id="quickLocationChips">
+              <span class="chip" onclick="setLocation('Jaipur, India')">Jaipur, IN</span>
+              <span class="chip" onclick="setLocation('Mumbai, India')">Mumbai, IN</span>
+              <span class="chip" onclick="setLocation('Austin, TX')">Austin, US</span>
+              <span class="chip" onclick="setLocation('London, UK')">London, UK</span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="maxResultsInput">Max Leads Target</label>
+              <div class="range-wrapper">
+                <input type="range" id="maxResultsRange" min="10" max="100" step="5" value="30" oninput="syncMaxResults(this.value)" />
+                <input type="number" id="maxResultsInput" value="30" min="5" max="200" oninput="syncMaxResultsRange(this.value)" />
+              </div>
+            </div>
+
+            <div class="form-group flex-1">
+              <label for="delayInput">Enrich Delay (s)</label>
+              <input type="number" id="delayInput" value="1.5" min="0.5" max="5.0" step="0.5" />
+            </div>
+          </div>
+
+          <div class="form-group checkbox-group">
+            <label class="toggle-switch">
+              <input type="checkbox" id="enrichToggle" checked />
+              <span class="toggle-slider"></span>
+            </label>
+            <div class="toggle-label">
+              <strong>Enrich Phone, Website & Address</strong>
+              <small>Visits detail pages to extract phone numbers and website links</small>
+            </div>
+          </div>
+
+          <button type="submit" id="startScrapeBtn" class="btn btn-primary btn-block">
+            <i class="fa-solid fa-rocket"></i> Launch Lead Scraper →
+          </button>
+        </form>
       </section>
 
-    </main>
+      <!-- Live Execution Monitor -->
+      <section class="card">
+        <div class="card-header">
+          <h3><i class="fa-solid fa-microchip"></i> Scraper Execution Engine</h3>
+          <span class="badge" id="phaseBadge">IDLE</span>
+        </div>
 
-    <!-- Toast Notification Container -->
-    <div id="toastContainer" class="toast-container"></div>
+        <div class="progress-section">
+          <div class="progress-info">
+            <span id="currentStatusMessage">Waiting for search launch...</span>
+            <strong id="progressCounter">0 / 0</strong>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progressBarFill"></div>
+          </div>
+        </div>
+
+        <div class="console-box">
+          <div class="console-header">
+            <span><i class="fa-solid fa-terminal"></i> Terminal Output</span>
+            <div>
+              <button class="btn-text" onclick="copyLogs()"><i class="fa-solid fa-copy"></i> Copy</button>
+              <button class="btn-text" onclick="clearLogs()" style="margin-left: 8px;"><i class="fa-solid fa-eraser"></i> Clear</button>
+            </div>
+          </div>
+          <div class="console-logs" id="consoleLogs">
+            <div class="log-entry system">[System Initialized] Ready to initiate extraction job.</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- SECTION 6: BUSINESS LEADS DASHBOARD & TABLE -->
+    <section class="card" id="resultsSection">
+      <div class="card-header border-bottom">
+        <div>
+          <h2><i class="fa-solid fa-database"></i> 05 · BUSINESS LEADS DATASET</h2>
+          <p id="resultsSubtext">Extracted B2B leads with validated contact information</p>
+        </div>
+        <div class="table-actions">
+          <button class="btn btn-outline" id="copyNoWebPhonesBtn" onclick="copyNoWebsitePhones()" title="Copy phone numbers of businesses without a website">
+            <i class="fa-solid fa-fire" style="color: #d97706;"></i> Pitch Targets Phones
+          </button>
+          <button class="btn btn-outline" id="copyPhonesBtn" onclick="copyAllPhones()">
+            <i class="fa-solid fa-copy"></i> Copy All Phones
+          </button>
+          <a href="/api/download" class="btn btn-secondary">
+            <i class="fa-solid fa-file-csv"></i> Export CSV
+          </a>
+        </div>
+      </div>
+
+      <!-- KPI Metrics Grid -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon icon-blue"><i class="fa-solid fa-users"></i></div>
+          <div class="kpi-data">
+            <span class="kpi-label">Total Leads</span>
+            <h3 id="kpiTotalCount">0</h3>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon icon-green"><i class="fa-solid fa-phone"></i></div>
+          <div class="kpi-data">
+            <span class="kpi-label">Phone Coverage</span>
+            <h3 id="kpiPhonePct">0%</h3>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon icon-amber">
+            <i class="fa-solid fa-laptop-code"></i>
+          </div>
+          <div class="kpi-data">
+            <span class="kpi-label">Pitch Targets (No Web)</span>
+            <h3 id="kpiNoWebCount">0</h3>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon icon-blue">
+            <i class="fa-solid fa-star"></i>
+          </div>
+          <div class="kpi-data">
+            <span class="kpi-label">Avg Rating</span>
+            <h3 id="kpiAvgRating">0.0</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table Filter Pills -->
+      <div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;" id="tableFilters">
+        <button class="category-tab active" onclick="filterLeads('all', this)">All Leads</button>
+        <button class="category-tab" onclick="filterLeads('phone', this)">With Phone</button>
+        <button class="category-tab" onclick="filterLeads('nowebsite', this)">Pitch Targets (No Website)</button>
+        <button class="category-tab" onclick="filterLeads('highrating', this)">Top Rated (4.5★+)</button>
+      </div>
+
+      <!-- Table Container -->
+      <div class="table-responsive">
+        <table class="leads-table" id="leadsTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Business Name</th>
+              <th>Phone Number</th>
+              <th>Website</th>
+              <th>Address / Location</th>
+              <th>Rating</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="leadsTableBody">
+            <tr>
+              <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                No business leads loaded yet. Select a target or launch a search above.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Technical Footer -->
+    <footer class="sys-footer">
+      <div>LEADFORGE MAPS · <span>INDUSTRIAL RETRO LEAD DISCOVERY ENGINE</span></div>
+      <div style="margin-top: 4px; opacity: 0.7;">GRID: 24MM · ACCURACY: 99.4% · STEALTH B2B SCRAPING ENGINE V3.6</div>
+    </footer>
   </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
 
   <script src="app.js"></script>
 </body>

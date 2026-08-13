@@ -34,8 +34,8 @@ RUN python3 -m patchright install
 # Copy application files
 COPY . .
 
-# Expose port
+# Expose default port
 EXPOSE 8000
 
-# Start FastAPI server
-CMD ["python3", "-m", "uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"]
+# Start FastAPI server (supports PORT env var from Render/Railway/Fly.io)
+CMD ["sh", "-c", "uvicorn server:app --host 0.0.0.0 --port ${PORT:-8000}"]
