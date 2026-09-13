@@ -2,8 +2,7 @@ services:
   - type: web
     name: leadforge-maps-scraper
     env: docker
-    plan: starter # 1GB+ RAM recommended for headless Chromium
-    region: singapore
+    plan: free # Note: 512MB RAM — tight for headless Chromium, keep max_results low    region: singapore
     dockerfilePath: ./Dockerfile
     healthCheckPath: /api/status
     envVars:
