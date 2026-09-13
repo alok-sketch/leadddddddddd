@@ -19,6 +19,15 @@ RUN apt-get update && apt-get install -y \
     libxrandr2 \
     libgbm1 \
     libasound2 \
+    libcairo2 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libgdk-pixbuf2.0-0 \
+    libgtk-3-0 \
+    fonts-liberation \
+    libx11-xcb1 \
+    libxfixes3 \
+    libxext6 \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
@@ -28,8 +37,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install patchright browser executables
-RUN python3 -m patchright install
+# Install patchright browser executables + all required OS-level dependencies
+RUN python3 -m patchright install --with-deps chromium
 
 # Copy application files
 COPY . .
