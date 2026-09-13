@@ -194,6 +194,8 @@ class ScrapeRequest(BaseModel):
     max_results: int = 30
     enrich: bool = True
     delay: float = 1.5
+    only_no_website: bool = False
+    min_rating: float = 0.0
 
 def add_log(message: str):
     timestamp = time.strftime("%H:%M:%S")
@@ -204,7 +206,10 @@ def add_log(message: str):
         if len(scrape_state["logs"]) > 200:
             scrape_state["logs"].pop(0)
 
-def run_scraper_task(query: str, location: str, max_results: int, enrich: bool, delay: float):
+def run_scraper_task(query: str, location: str, max_results: int, enrich: bool, delay: float, only_no_website: bool = False, min_rating: float = 0.0):
+    if only_no_website:
+        enrich = True  # Website filtering requires Phase 2 enrichment
+
     with state_lock:
         scrape_state["is_running"] = True
         scrape_state["query"] = query
@@ -212,6 +217,8 @@ def run_scraper_task(query: str, location: str, max_results: int, enrich: bool, 
         scrape_state["max_results"] = max_results
         scrape_state["enrich"] = enrich
         scrape_state["delay"] = delay
+        scrape_state["only_no_website"] = only_no_website
+        scrape_state["min_rating"] = min_rating
         scrape_state["phase"] = "searching"
         scrape_state["progress"] = 0
         scrape_state["total"] = max_results
@@ -221,21 +228,30 @@ def run_scraper_task(query: str, location: str, max_results: int, enrich: bool, 
         scrape_state["error"] = None
         scrape_state["completed_at"] = None
 
-    add_log(f"🚀 Initializing Lead Scraper for '{query}' near '{location}' (Target: {max_results})")
+    filter_info = []
+    if only_no_website:
+        filter_info.append("Only No-Website Leads")
+    if min_rating > 0:
+        filter_info.append(f"Min Rating: {min_rating}+ Stars")
+    filter_str = f" [{', '.join(filter_info)}]" if filter_info else ""
+
+    candidate_limit = max_results * 4 if (only_no_website or min_rating > 0) else max_results
+
+    add_log(f"🚀 Initializing Lead Scraper for '{query}' near '{location}' (Target: {max_results} qualified leads, Pool: up to {candidate_limit}){filter_str}")
 
     try:
         # Import scrapling fetcher directly to report progress accurately
         from scrapling.fetchers import StealthyFetcher
-        from maps_lead_scraper import build_search_url, make_scroll_action, extract_detail_text
+        from maps_lead_scraper import build_search_url, make_scroll_action, extract_detail_text, parse_rating_value, extract_website
 
         search_url = build_search_url(query, location)
-        add_log(f"Phase 1: Loading search feed {search_url}...")
+        add_log(f"Phase 1: Loading search feed {search_url} (digging candidate listings)...")
         
         page = StealthyFetcher.fetch(
             search_url,
             headless=True,
             network_idle=True,
-            page_action=make_scroll_action(max_results),
+            page_action=make_scroll_action(candidate_limit),
         )
 
         cards = page.css('div[role="feed"] > div > div[jsaction]')
@@ -257,10 +273,10 @@ def run_scraper_task(query: str, location: str, max_results: int, enrich: bool, 
                 "place_url": link,
             })
 
-            if len(listings) >= max_results:
+            if len(listings) >= candidate_limit:
                 break
 
-        add_log(f"✅ Phase 1 complete! Collected {len(listings)} business listings.")
+        add_log(f"✅ Phase 1 complete! Collected {len(listings)} candidate business listings from search feed.")
 
         with state_lock:
             scrape_state["total"] = len(listings)
@@ -268,17 +284,21 @@ def run_scraper_task(query: str, location: str, max_results: int, enrich: bool, 
 
         final_rows = []
         if enrich and listings:
-            add_log(f"Phase 2: Enriching {len(listings)} listings with phone, website & address details...")
+            add_log(f"Phase 2: Enriching listings & digging until target quota of {max_results} qualified leads is met...")
             for idx, item in enumerate(listings, 1):
+                if len(final_rows) >= max_results:
+                    add_log(f"🎯 Target quota of {max_results} qualified leads reached! Stopping enrichment.")
+                    break
+
                 with state_lock:
                     scrape_state["progress"] = idx
-                    scrape_state["current_status"] = f"Phase 2: Enriching item {idx}/{len(listings)}: {item['name']}"
+                    scrape_state["current_status"] = f"Phase 2: Digging item {idx}/{len(listings)} (Qualified: {len(final_rows)}/{max_results}): {item['name']}"
 
                 try:
                     p_page = StealthyFetcher.fetch(item["place_url"], headless=True, network_idle=True)
                     e_name = p_page.css('h1::text').get() or item["name"]
                     phone_raw = extract_detail_text(p_page, "phone:")
-                    website = p_page.css('a[data-item-id="authority"]::attr(href)').get() or ""
+                    website = extract_website(p_page)
                     address_raw = extract_detail_text(p_page, "address")
 
                     phone = re.sub(r"^[^\d+]*", "", phone_raw)
@@ -292,11 +312,28 @@ def run_scraper_task(query: str, location: str, max_results: int, enrich: bool, 
                         "place_url": item["place_url"],
                         "rating_raw": item.get("rating_raw", "")
                     }
+
+                    # Filter validation
+                    has_website = bool(website.strip())
+                    rating_val = parse_rating_value(detail.get("rating_raw", ""))
+
+                    if only_no_website and has_website:
+                        add_log(f"  [{idx}/{len(listings)}] ⏭️ Skipped {e_name} (Has website: {website})")
+                        time.sleep(delay)
+                        continue
+
+                    if min_rating > 0 and rating_val < min_rating:
+                        add_log(f"  [{idx}/{len(listings)}] ⏭️ Skipped {e_name} (Rating {rating_val} < {min_rating})")
+                        time.sleep(delay)
+                        continue
+
                     final_rows.append(detail)
-                    add_log(f"  [{idx}/{len(listings)}] Extracted: {e_name} | Phone: {phone or 'N/A'}")
+                    web_badge = "NO WEBSITE 🔥" if not has_website else website
+                    add_log(f"  [{idx}/{len(listings)}] ✅ Qualified [{len(final_rows)}/{max_results}]: {e_name} | Rating: {rating_val}⭐ | Web: {web_badge}")
                 except Exception as ex:
                     add_log(f"  [{idx}/{len(listings)}] ⚠️ Failed enriching {item['name']}: {ex}")
-                    final_rows.append(item)
+                    if not only_no_website and min_rating == 0:
+                        final_rows.append(item)
 
                 time.sleep(delay)
         else:
@@ -314,11 +351,11 @@ def run_scraper_task(query: str, location: str, max_results: int, enrich: bool, 
         with state_lock:
             scrape_state["results"] = final_rows
             scrape_state["phase"] = "completed"
-            scrape_state["current_status"] = f"Done! Scraped & saved {len(final_rows)} leads to {output_file}"
+            scrape_state["current_status"] = f"Done! Qualified & saved {len(final_rows)} leads to {output_file}"
             scrape_state["completed_at"] = time.strftime("%Y-%m-%d %H:%M:%S")
             scrape_state["is_running"] = False
 
-        add_log(f"🎉 Scraping Job Completed Successfully! {len(final_rows)} leads saved.")
+        add_log(f"🎉 Scraping Job Completed Successfully! {len(final_rows)} qualified leads saved.")
 
     except Exception as e:
         err_msg = str(e)
@@ -341,7 +378,9 @@ def start_scrape(req: ScrapeRequest, background_tasks: BackgroundTasks):
         location=req.location,
         max_results=req.max_results,
         enrich=req.enrich,
-        delay=req.delay
+        delay=req.delay,
+        only_no_website=req.only_no_website,
+        min_rating=req.min_rating
     )
     return {"status": "started", "message": "Lead generation job started in background."}
 
@@ -353,6 +392,8 @@ def get_status():
             "query": scrape_state["query"],
             "location": scrape_state["location"],
             "max_results": scrape_state["max_results"],
+            "only_no_website": scrape_state.get("only_no_website", False),
+            "min_rating": scrape_state.get("min_rating", 0.0),
             "phase": scrape_state["phase"],
             "progress": scrape_state["progress"],
             "total": scrape_state["total"],
@@ -362,6 +403,7 @@ def get_status():
             "error": scrape_state["error"],
             "completed_at": scrape_state["completed_at"]
         }
+
 
 @app.get("/api/results")
 def get_results():

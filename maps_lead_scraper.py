@@ -102,12 +102,65 @@ def extract_detail_text(page_selector, item_id_prefix: str) -> str:
     return el or ""
 
 
+def clean_website_url(url: str) -> str:
+    if not url:
+        return ""
+    url = url.strip()
+    if "google.com/url?" in url and "q=" in url:
+        match = re.search(r"[?&]q=([^&]+)", url)
+        if match:
+            from urllib.parse import unquote
+            url = unquote(match.group(1))
+    return url.strip()
+
+
+def extract_website(page) -> str:
+    """Multi-stage detection for business website URL on Google Maps detail page."""
+    # Stage 1: Google primary authority link
+    website = page.css('a[data-item-id="authority"]::attr(href)').get()
+    if website:
+        return clean_website_url(website)
+
+    # Stage 2: aria-label or tooltip containing 'website' or 'Website'
+    website = page.css('a[aria-label*="website"]::attr(href)').get() or \
+              page.css('a[aria-label*="Website"]::attr(href)').get() or \
+              page.css('a[data-tooltip*="website"]::attr(href)').get() or \
+              page.css('a[data-tooltip*="Website"]::attr(href)').get()
+    if website:
+        return clean_website_url(website)
+
+    # Stage 3: External anchor links in main panel
+    all_links = page.css('a::attr(href)').getall()
+    for link in all_links:
+        if link and ("http://" in link or "https://" in link):
+            link_lower = link.lower()
+            if not any(domain in link_lower for domain in ["google.com", "google.co", "ggpht.com", "gstatic.com", "schema.org", "w3.org", "facebook.com", "instagram.com"]):
+                return clean_website_url(link)
+
+    return ""
+
+
+def parse_rating_value(rating_raw: str) -> float:
+    """Extracts floating point star rating from aria-label string (e.g. '4.5 stars' -> 4.5)."""
+    if not rating_raw:
+        return 0.0
+    match = re.search(r"(\d+(?:\.\d+)?)", rating_raw)
+    if match:
+        try:
+            val = float(match.group(1))
+            if 0.0 <= val <= 5.0:
+                return val
+        except ValueError:
+            pass
+    return 0.0
+
+
 def enrich_listing(place_url: str) -> dict:
     page = StealthyFetcher.fetch(place_url, headless=True, network_idle=True)
 
     name = page.css('h1::text').get() or ""
     phone_raw = extract_detail_text(page, "phone:")
-    website = page.css('a[data-item-id="authority"]::attr(href)').get() or ""
+    website = extract_website(page)
     address_raw = extract_detail_text(page, "address")
 
     phone = re.sub(r"^[^\d+]*", "", phone_raw)  # strip leading label text, keep the number
@@ -123,21 +176,44 @@ def enrich_listing(place_url: str) -> dict:
 
 # ---------- main ----------
 
-def run(query: str, location: str, max_results: int, output_path: str, enrich: bool, delay: float):
-    print(f"[1/2] Searching '{query}' near '{location}'...")
-    listings = collect_listings(query, location, max_results)
-    print(f"  found {len(listings)} listings")
+def run(query: str, location: str, max_results: int, output_path: str, enrich: bool, delay: float, only_no_website: bool = False, min_rating: float = 0.0):
+    if only_no_website:
+        enrich = True  # Website status requires enrichment
+
+    # If filtering, expand candidate pool so we dig enough results to reach target max_results
+    candidate_limit = max_results * 4 if (only_no_website or min_rating > 0) else max_results
+
+    print(f"[1/2] Searching '{query}' near '{location}' (Candidate pool: up to {candidate_limit})...")
+    listings = collect_listings(query, location, candidate_limit)
+    print(f"  found {len(listings)} candidate listings")
 
     rows = listings
     if enrich:
-        print("[2/2] Enriching each listing with phone/website/address...")
+        print(f"[2/2] Enriching listings & digging for target {max_results} qualified leads...")
         rows = []
         for i, item in enumerate(listings, 1):
+            if len(rows) >= max_results:
+                print(f"🎯 Reached target quota of {max_results} qualified leads!")
+                break
+
             try:
                 detail = enrich_listing(item["place_url"])
                 detail["rating_raw"] = item.get("rating_raw", "")
+                
+                # Check filters
+                has_website = bool(detail.get("website", "").strip())
+                rating_val = parse_rating_value(detail.get("rating_raw", ""))
+
+                if only_no_website and has_website:
+                    print(f"  ({i}/{len(listings)}) ⏭️ Skipped {detail['name']} (Has website: {detail['website']})")
+                    continue
+
+                if min_rating > 0 and rating_val < min_rating:
+                    print(f"  ({i}/{len(listings)}) ⏭️ Skipped {detail['name']} (Rating {rating_val} < {min_rating})")
+                    continue
+
                 rows.append(detail)
-                print(f"  ({i}/{len(listings)}) {detail['name']}")
+                print(f"  ({i}/{len(listings)}) ✅ Kept [{len(rows)}/{max_results}]: {detail['name']} | Rating: {rating_val}⭐ | Web: NONE (NO WEBSITE)")
             except Exception as e:
                 print(f"  ({i}/{len(listings)}) failed: {e}")
             time.sleep(delay)
@@ -148,7 +224,7 @@ def run(query: str, location: str, max_results: int, output_path: str, enrich: b
         writer.writeheader()
         writer.writerows(rows)
 
-    print(f"Saved {len(rows)} leads to {output_path}")
+    print(f"Saved {len(rows)} qualified leads to {output_path}")
 
 
 if __name__ == "__main__":
@@ -159,6 +235,8 @@ if __name__ == "__main__":
     parser.add_argument("--output", default="leads.csv")
     parser.add_argument("--no-enrich", action="store_true", help="Skip phase 2 (phone/website/address)")
     parser.add_argument("--delay", type=float, default=1.5, help="Seconds between enrichment requests")
+    parser.add_argument("--only-no-website", action="store_true", help="Keep only leads that do NOT have a website")
+    parser.add_argument("--min-rating", type=float, default=0.0, help="Minimum Google rating threshold (e.g. 4.0)")
     args = parser.parse_args()
 
     run(
@@ -168,4 +246,7 @@ if __name__ == "__main__":
         output_path=args.output,
         enrich=not args.no_enrich,
         delay=args.delay,
+        only_no_website=args.only_no_website,
+        min_rating=args.min_rating,
     )
+

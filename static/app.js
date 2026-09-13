@@ -352,6 +352,37 @@ function syncMaxResultsRange(val) {
   document.getElementById('maxResultsRange').value = val;
 }
 
+function activateNoWebsitePitchMode() {
+  const toggle = document.getElementById('onlyNoWebsiteToggle');
+  const enrich = document.getElementById('enrichToggle');
+  const rating = document.getElementById('minRatingSelect');
+
+  if (toggle) toggle.checked = true;
+  if (enrich) enrich.checked = true;
+  if (rating) rating.value = '4.0';
+
+  updateFormStateForNoWebsite();
+  showToast('🔥 Website-Less Pitch Mode Activated! Ready to dig website-less leads.', 'success');
+  scrollToControl();
+}
+
+function updateFormStateForNoWebsite() {
+  const toggle = document.getElementById('onlyNoWebsiteToggle');
+  const enrich = document.getElementById('enrichToggle');
+  const btn = document.getElementById('startScrapeBtn');
+
+  if (toggle && toggle.checked) {
+    if (enrich) enrich.checked = true; // Website status requires enrichment
+    if (btn && !btn.disabled) {
+      btn.innerHTML = `<i class="fa-solid fa-fire" style="color: #fbbf24;"></i> Launch Engine (Dig No-Website Leads) →`;
+    }
+  } else {
+    if (btn && !btn.disabled) {
+      btn.innerHTML = `<i class="fa-solid fa-rocket"></i> Launch Lead Scraper →`;
+    }
+  }
+}
+
 /* ==========================================================================
    5. SCRAPE SUBMISSION & STATUS POLLING
    ========================================================================== */
@@ -363,6 +394,8 @@ async function handleScrapeSubmit(e) {
   const max_results = parseInt(document.getElementById('maxResultsInput').value) || 30;
   const delay = parseFloat(document.getElementById('delayInput').value) || 1.5;
   const enrich = document.getElementById('enrichToggle').checked;
+  const only_no_website = document.getElementById('onlyNoWebsiteToggle') ? document.getElementById('onlyNoWebsiteToggle').checked : false;
+  const min_rating = document.getElementById('minRatingSelect') ? (parseFloat(document.getElementById('minRatingSelect').value) || 0.0) : 0.0;
 
   if (!query || !location) {
     showToast('Please enter both Query and Location!', 'warning');
@@ -377,7 +410,7 @@ async function handleScrapeSubmit(e) {
     const res = await fetch('/api/scrape', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, location, max_results, enrich, delay })
+      body: JSON.stringify({ query, location, max_results, enrich, delay, only_no_website, min_rating })
     });
 
     const data = await res.json();
