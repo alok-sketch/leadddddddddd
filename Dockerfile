@@ -1,33 +1,12 @@
 # Use Python 3.11 slim image
 FROM python:3.11-slim
 
-# Install OS level dependencies for Chromium & Playwright
+# Base OS-level tools (Chromium's own deps are installed later via --with-deps)
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
     ca-certificates \
     procps \
-    libsqlite3-0 \
-    libnss3 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libdrm2 \
-    libxkbcommon0 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxrandr2 \
-    libgbm1 \
-    libasound2 \
-    libcairo2 \
-    libpango-1.0-0 \
-    libpangocairo-1.0-0 \
-    libgdk-pixbuf2.0-0 \
-    libgtk-3-0 \
-    fonts-liberation \
-    libx11-xcb1 \
-    libxfixes3 \
-    libxext6 \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
